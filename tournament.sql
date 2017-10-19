@@ -11,27 +11,31 @@ CREATE DATABASE tournament;
 CREATE TABLE players (
   /*Registered players of tournament*/
 Id serial PRIMARY KEY,
-Name TEXT NOT NULL,
-Team TEXT);
+Name TEXT NOT NULL);
 
 CREATE TABLE match (
   /*Lists winners of matches*/
-match serial PRIMARY KEY,
+matchID serial PRIMARY KEY,
 player1_id SMALLINT,
 player2_id SMALLINT,
-winner SMALLINT);
+winner SMALLINT,
+loser SMALLINT);
 
-CREATE TABLE Player_Stats (
+DECLARE Ranks float =  COUNT(match.winner WHERE match.winner=players.id)/COUNT(match.winner WHERE (match.winner=players.id OR match.loser=players.id)
+
+CREATE VIEW Player_Stats (Id, Name, Wins, Matches, Ranking)
   /*Lists individual player stats*/
-  id TEXT,
-  name TEXT,
-  wins SMALLINT default 0,
-  matches SMALLINT default 0,
-  ranks SMALLINT);
+  AS Select players.id, players.name, COUNT(match.winner WHERE match.winner=players.id), COUNT(match.winner WHERE match.winner=players.id OR match.loser=players.id), Ranks
+  FROM players JOIN match ON players.id = match.winner and players.id=match.loser
+  ORDER BY Ranking;
 
-CREATE TABLE Swiss_Pairs(
-  /*Lists next sets of Swiss pairs*/
-  id1 SMALLINT,
-  name1 TEXT,
-  id2 SMALLINT,
-  name2 TEXT);
+--Shows next pairing for matches
+CREATE VIEW Swiss_Pairs (id1, name1, id2, name2)
+
+
+-- CREATE TABLE Swiss_Pairs(
+--   /*Lists next sets of Swiss pairs*/
+--   id1 SMALLINT,
+--   name1 TEXT,
+--   id2 SMALLINT,
+--   name2 TEXT);

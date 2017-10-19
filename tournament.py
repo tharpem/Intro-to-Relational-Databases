@@ -18,9 +18,6 @@ def deletePlayers():
     deletePlayersSQL = "DELETE FROM players"
     cur.execute(deletePlayersSQL)
     cnx.commit()
-    deletePlayerStatsSQL = """DELETE FROM Player_Stats"""
-    cur.execute(deletePlayerStatsSQL)
-    cnx.commit()
     return deletePlayersSQL
 
 def deleteMatches():
@@ -52,6 +49,7 @@ def registerPlayer (playername):
     Args:
       name: the player's full name (need not be unique).
     """
+    #register player in players
     registerSQL = ("INSERT INTO players (name) VALUES('" + playername +"')")
     cur.execute(registerSQL)
     cnx.commit()
@@ -91,6 +89,7 @@ def playerStandings():
     for row in rows:
         print (row)
     return rows
+
 def reportMatch(winner, loser):
     """Records the outcome of a single match between two players.
 
@@ -100,43 +99,43 @@ def reportMatch(winner, loser):
     """
     winner = str(winner)
     loser = str(loser)
-    input_match_SQL = """INSERT INTO match (player1_id, player2_id, winner) VALUES ('""" + winner + """', '""" + loser + """', '""" + winner +"""')"""
+    input_match_SQL = """INSERT INTO match (winner, loser) VALUES ('""" + winner + """', '""" + loser + """')"""
     cur.execute(input_match_SQL)
     cnx.commit()
     adjustWinnerStats(winner)
     adjustWinnerStats(loser)
     return winner
 
-def adjustWinnerStats(winner):
-    findWinSQL="""SELECT (wins, matches) FROM Player_Stats WHERE id = '""" + winner + """'"""
-    cur.execute(findWinSQL)
-    wins_Matches= cur.fetchone()
-    winner_Wins = wins_Matches[0][1]
-    winner_Wins = int(winner_Wins)
-    winner_Wins += 1
-    winner_Matches = wins_Matches[0][3]
-    winner_Matches = int(winner_Matches)
-    winner_Matches +=1
-    player_rank = winner_Matches/winner_Wins
-    player_rank = str(player_rank)
-    winner_Wins = str(winner_Wins)
-    winner_Matches = str(winner_Matches)
-    addWin = """UPDATE Player_Stats SET
-    wins = '"""+ winner_Wins + """', matches = '""" + winner_Matches + """', ranks = '""" + player_rank + """' WHERE id ='""" + winner + """'"""
-    cur.execute(addWin)
-    cnx.commit()
-
-def adjustWinnerStats(loser):
-    findWinSQL="""SELECT (wins, matches) FROM Player_Stats WHERE id = '""" + loser + """'"""
-    cur.execute(findWinSQL)
-    wins_Matches= cur.fetchone()
-    loser_Matches = wins_Matches[0][3]
-    loser_Matches = int(loser_Matches)
-    loser_Matches +=1
-    loser_Matches = str(loser_Matches)
-    addLose = """UPDATE Player_Stats SET matches = '""" + loser_Matches + """' WHERE id ='""" + loser + """'"""
-    cur.execute(addLose)
-    cnx.commit()
+# def adjustWinnerStats(winner):
+#     findWinSQL="""SELECT (wins, matches) FROM Player_Stats WHERE id = '""" + winner + """'"""
+#     cur.execute(findWinSQL)
+#     wins_Matches= cur.fetchone()
+#     winner_Wins = wins_Matches[0][1]
+#     winner_Wins = int(winner_Wins)
+#     winner_Wins += 1
+#     winner_Matches = wins_Matches[0][3]
+#     winner_Matches = int(winner_Matches)
+#     winner_Matches +=1
+#     player_rank = winner_Matches/winner_Wins
+#     player_rank = str(player_rank)
+#     winner_Wins = str(winner_Wins)
+#     winner_Matches = str(winner_Matches)
+#     addWin = """UPDATE Player_Stats SET
+#     wins = '"""+ winner_Wins + """', matches = '""" + winner_Matches + """', ranks = '""" + player_rank + """' WHERE id ='""" + winner + """'"""
+#     cur.execute(addWin)
+#     cnx.commit()
+#
+# def adjustWinnerStats(loser):
+#     findWinSQL="""SELECT (wins, matches) FROM Player_Stats WHERE id = '""" + loser + """'"""
+#     cur.execute(findWinSQL)
+#     wins_Matches= cur.fetchone()
+#     loser_Matches = wins_Matches[0][3]
+#     loser_Matches = int(loser_Matches)
+#     loser_Matches +=1
+#     loser_Matches = str(loser_Matches)
+#     addLose = """UPDATE Player_Stats SET matches = '""" + loser_Matches + """' WHERE id ='""" + loser + """'"""
+#     cur.execute(addLose)
+#     cnx.commit()
 
 #helper function for swissPairings to clear prior data
 def deleteSwissPairs():
@@ -146,16 +145,23 @@ def deleteSwissPairs():
 
 #helper function for swissPairings to add names from players table to Swiss_Pairs table
 def addingNames():
-    add_Name1_SQL = """UPDATE Swiss_Pairs SET name1 = players.name FROM players WHERE Swiss_Pairs.id1 = players.id"""
+    add_Name1_SQL="""INSERT INTO match (player1_id) VALUES players.name FROM players WHERE match.player1_id = players.id """
     cur.execute(add_Name1_SQL)
     cnx.commit()
-    add_Name2_SQL = """UPDATE Swiss_Pairs SET name2 = players.name FROM players WHERE Swiss_Pairs.id2= players.id"""
+    add_Name2_SQL = """INSERT INTO match (player2_id) VALUES players.name FROM players WHERE match.player2_id = players.id """
     cur.execute(add_Name2_SQL)
     cnx.commit()
 
+    # add_Name1_SQL = """UPDATE Swiss_Pairs SET name1 = players.name FROM players WHERE Swiss_Pairs.id1 = players.id"""
+    # cur.execute(add_Name1_SQL)
+    # cnx.commit()
+    # add_Name2_SQL = """UPDATE Swiss_Pairs SET name2 = players.name FROM players WHERE Swiss_Pairs.id2= players.id"""
+    # cur.execute(add_Name2_SQL)
+    # cnx.commit()
+
 #helper function for swissPairings to show pairings from Swiss_Pairs
 def show_Swiss_Pairs():
-    swissListSQL = """SELECT * FROM Swiss_Pairs"""
+    swissListSQL = """SELECT * FROM match WHERE winner=null"""
     cur.execute(swissListSQL)
     rows = cur.fetchall()
     for row in rows:
@@ -189,7 +195,7 @@ def swissPairings():
     while pair_count <= countPlayers()/2 - 2:
         id1 = pair_List[index]
         id2 = pair_List[index+1]
-        swiss_Insertion_SQL = """INSERT INTO Swiss_Pairs (id1, id2) VALUES ('""" + id1 + """', '""" + id2 + """')"""
+        swiss_Insertion_SQL = """INSERT INTO match (id1, id2) VALUES ('""" + id1 + """', '""" + id2 + """')"""
         cur.execute(swiss_Insertion_SQL)
         cnx.commit()
         index +=2
