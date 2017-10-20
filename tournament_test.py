@@ -7,6 +7,10 @@
 
 
 from tournament import *
+connect()
+cnx = psycopg2.connect("dbname='tournament'")
+cur = cnx.cursor()
+
 
 def testCount():
     """
@@ -152,3 +156,6 @@ if __name__ == '__main__':
     testReportMatches()
     testPairings()
     print "Success!  All tests pass!"
+
+cur.close()
+cnx.close()

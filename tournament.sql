@@ -3,6 +3,8 @@
 
 CREATE DATABASE tournament;
 
+\c tournament
+
 CREATE TABLE players (
   /*Registered players of tournament*/
 Id serial PRIMARY KEY,

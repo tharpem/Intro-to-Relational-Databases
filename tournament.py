@@ -9,9 +9,6 @@ def connect():
 #     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname='tournament'")
 
-connect()
-cnx = psycopg2.connect("dbname='tournament'")
-cur = cnx.cursor()
 
 def deletePlayers():
     """Remove all the player records from the database."""
@@ -160,8 +157,3 @@ def swissPairings():
     createSwissIDPairs(newPair) #create list of id's
     addNameSwissIDPairs(newPair)    # add names to list and print
     return newPair
-
-
-
-cur.close()
-cnx.close()
