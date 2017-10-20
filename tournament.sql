@@ -39,7 +39,7 @@ loser SMALLINT);
 -- FROM match JOIN players ON  match.player1_id=players.id OR match.player2_id=players.id
 -- WHERE players.id=match.player1_id OR players.id=match.player2_id;
 
-CREATE VIEW playerTotalMatches AS SELECT players.id AS ID, COUNT(match.matchID) AS Count FROM players LEFT JOIN match on players.id=match.player1_id OR players.id=match.player2_id
+CREATE VIEW playerTotalMatches AS SELECT players.id AS ID, COUNT(match.matchID) AS Count FROM players LEFT JOIN match on players.id=match.winner OR players.id=match.loser
 GROUP BY players.id;
 
 CREATE VIEW playerTotalWins AS SELECT players.id AS ID, COUNT(match.winner) As Wins FROM players LEFT JOIN match
