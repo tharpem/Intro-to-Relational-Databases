@@ -36,10 +36,33 @@ def seeRegisteredPlayers():
 
 # #helper function for registerPlayer to input registered player into the playerStandings table
 # #default wins and matches of 0
-def inputPlayerStandings(playername, getPlayerID):
-    cur.execute("INSERT INTO Player_Stats (id, name) VALUES ('" + getPlayerID + "', '"+ playername + "')")
-    cnx.commit()
-    return getPlayerID
+
+# def inputPlayerStandings(playername, getPlayerID):
+#     cur.execute("INSERT INTO Player_Stats (id, name) VALUES ('" + getPlayerID + "', '"+ playername + "')")
+#     cnx.commit()
+#     return getPlayerID
+unplayedMatch = []
+
+def pullMatchedId():
+    cur.execute("""SELECT player1_id FROM match WHERE winner=Null""")
+    matchedrows=cur.fetchall()
+    for row in matchedrows:
+        unplayedMatch.append()
+    cur.execute("""SELECT player2_id FROM match WHERE winner=Null""")
+    matched2rows=cur.fetchall()
+    for row in matched2rows:
+        unplayedMatch.append()
+    return unplayedMatch
+
+# def inputFirstMatch(getPlayerID):
+#     pullMatchedId()
+#     for items in unplayedMatch:
+#         if getPlayerID NOT IN unplayedMatch:
+#         pair_List.append()
+#     cur.execute("INSERT INTO Player_Stats (id, name) VALUES ('" + getPlayerID + "', '"+ playername + "')")
+#     cnx.commit()
+#     return getPlayerID
+
 
 def registerPlayer (playername):
     """Adds a player to the tournament database.
@@ -57,7 +80,7 @@ def registerPlayer (playername):
     getPlayerID= cur.fetchone()
     getPlayerID = getPlayerID[0]
     getPlayerID = str(getPlayerID)
-    inputPlayerStandings(playername, getPlayerID)
+    # inputFirstMatch(getPlayerID)
     cnx.commit()
     return registerSQL
 
@@ -185,7 +208,6 @@ def swissPairings():
     index = 0
     pair_count = 0
     pair_List = []
-    deleteSwissPairs()
     ranked_ID_SQL = """SELECT id FROM Player_Stats ORDER BY Ranks DESC"""
     cur.execute(ranked_ID_SQL)
     rows=cur.fetchall()
@@ -204,6 +226,46 @@ def swissPairings():
     addingNames()
     return rows
 
+
+def testCount():
+    """
+    Test for initial player count,
+             player count after 1 and 2 players registered,
+             player count after players deleted.
+    """
+    deleteMatches()
+    print("Passed test count deleteMatches")
+    deletePlayers()
+    c = countPlayers()
+    if c == '0':
+        raise TypeError(
+            "countPlayers should return numeric zero, not string '0'.")
+    if c != 0:
+        raise ValueError("After deletion, countPlayers should return zero.")
+    print ("1. countPlayers() returns 0 after initial deletePlayers() execution.")
+    registerPlayer("Chandra Nalaar")
+    c = countPlayers()
+    if c != 1:
+        raise ValueError(
+            "After one player registers, countPlayers() should be 1. Got {c}".format(c=c))
+    print ("2. countPlayers() returns 1 after one player is registered.")
+    print("Passed first registration")
+    registerPlayer("Jace Beleren")
+    c = countPlayers()
+    if c != 2:
+        raise ValueError(
+            "After two players register, countPlayers() should be 2. Got {c}".format(c=c))
+    print ("3. countPlayers() returns 2 after two players are registered.")
+    print("Passed second registration")
+
+    deletePlayers()
+    c = countPlayers()
+    if c != 0:
+        raise ValueError(
+            "After deletion, countPlayers should return zero.")
+    print ("4. countPlayers() returns zero after registered players are deleted.\n5. Player records successfully deleted.")
+
+testCount()
 
 cur.close()
 cnx.close()

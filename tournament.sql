@@ -39,31 +39,27 @@ loser SMALLINT);
 -- FROM match JOIN players ON  match.player1_id=players.id OR match.player2_id=players.id
 -- WHERE players.id=match.player1_id OR players.id=match.player2_id;
 
-CREATE VIEW playerTotalMatches AS SELECT players.id, COUNT(match.matchID) AS Count FROM players JOIN match on players.id=match.player1_id OR players.id=match.player2_id
+CREATE VIEW playerTotalMatches AS SELECT players.id AS ID, COUNT(match.matchID) AS Count FROM players LEFT JOIN match on players.id=match.player1_id OR players.id=match.player2_id
 GROUP BY players.id;
 
-CREATE VIEW playerTotalWins AS SELECT players.id, COUNT(match.winner) As Wins FROM players LEFT JOIN match
+CREATE VIEW playerTotalWins AS SELECT players.id AS ID, COUNT(match.winner) As Wins FROM players LEFT JOIN match
 ON match.winner=players.id
 GROUP BY players.id;
 
--- CREATE VIEW playerRanks AS SELECT players.id, playerTotalMatches.Count,
-
+CREATE VIEW playerRanks AS SELECT players.id AS ID, playerTotalWins.Wins/NULLIF(playerTotalMatches.Count,0) AS Ranking
+FROM players
+LEFT JOIN playerTotalWins ON players.id=playerTotalWins.ID
+INNER JOIN playerTotalMatches ON players.id=playerTotalMatches.ID
+ORDER BY Ranking;
 
 
 CREATE VIEW Player_Stats (Id, Name, Wins, Matches, Ranking)
   /*Lists individual player stats*/
-  AS Select players.id, players.name, COUNT(match.winner WHERE match.winner=players.id), COUNT(match.winner WHERE match.winner=players.id OR match.loser=players.id), COUNT(match.winner WHERE match.winner=players.id)/COUNT(match.winner WHERE (match.winner=players.id OR match.loser=players.id)
-  FROM players JOIN match ON players.id = match.winner and players.id=match.loser
-  ORDER BY Ranking;
-
-  CREATE VIEW Player_Stats AS SELECT players.id AS Id, players.name AS Name, countMatches(match) AS Matches  FROM players JOIN match
-  ON players.id = match.winner and players.id=match.loser;
-    /*Lists individual player stats*/
-    -- AS Select players.id, players.name, COUNT(match.winner WHERE match.winner=players.id), COUNT(match.winner WHERE match.winner=players.id OR match.loser=players.id), COUNT(match.winner WHERE match.winner=players.id)/COUNT(match.winner WHERE (match.winner=players.id OR match.loser=players.id)
-    FROM players
-    -- JOIN match ON players.id = match.winner and players.id=match.loser
-    -- ORDER BY Ranking;
-
+  AS Select players.id AS ID, players.name AS NAme, playerTotalWins.Wins AS Wins, playerTotalMatches.Count AS Matches, playerRanks.Ranking AS Ranking
+  From players LEFT OUTER JOIN playerTotalWins ON players.id=playerTotalWins.ID
+  INNER JOIN playerTotalMatches ON players.id=playerTotalMatches.ID
+  INNER JOIN playerRanks on players.id=playerRanks.ID
+  ORDER BY Ranking DESC;
 
 
 
