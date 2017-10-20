@@ -106,7 +106,7 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    seePlayerStandingsSQL = """SELECT Player_Stats.id AS ID, Player_Stats.name AS Name, Player_Stats.wins as Wins, Player_Stats.matches AS Matches FROM Player_Stats ORDER BY ranks DESC"""
+    seePlayerStandingsSQL = """SELECT Player_Stats.id AS ID, Player_Stats.name AS Name, Player_Stats.wins as Wins, Player_Stats.matches AS Matches FROM Player_Stats ORDER BY ranking DESC"""
     cur.execute(seePlayerStandingsSQL)
     rows = cur.fetchall()
     for row in rows:
@@ -227,45 +227,33 @@ def swissPairings():
     return rows
 
 
-def testCount():
+def testStandingsBeforeMatches():
     """
-    Test for initial player count,
-             player count after 1 and 2 players registered,
-             player count after players deleted.
+    Test to ensure players are properly represented in standings prior
+    to any matches being reported.
     """
     deleteMatches()
-    print("Passed test count deleteMatches")
     deletePlayers()
-    c = countPlayers()
-    if c == '0':
-        raise TypeError(
-            "countPlayers should return numeric zero, not string '0'.")
-    if c != 0:
-        raise ValueError("After deletion, countPlayers should return zero.")
-    print ("1. countPlayers() returns 0 after initial deletePlayers() execution.")
-    registerPlayer("Chandra Nalaar")
-    c = countPlayers()
-    if c != 1:
+    registerPlayer("Melpomene Murray")
+    registerPlayer("Randy Schwartz")
+    standings = playerStandings()
+    if len(standings) < 2:
+        raise ValueError("Players should appear in playerStandings even before "
+                         "they have played any matches.")
+    elif len(standings) > 2:
+        raise ValueError("Only registered players should appear in standings.")
+    if len(standings[0]) != 4:
+        raise ValueError("Each playerStandings row should have four columns.")
+    [(id1, name1, wins1, matches1), (id2, name2, wins2, matches2)] = standings
+    if matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0:
         raise ValueError(
-            "After one player registers, countPlayers() should be 1. Got {c}".format(c=c))
-    print ("2. countPlayers() returns 1 after one player is registered.")
-    print("Passed first registration")
-    registerPlayer("Jace Beleren")
-    c = countPlayers()
-    if c != 2:
-        raise ValueError(
-            "After two players register, countPlayers() should be 2. Got {c}".format(c=c))
-    print ("3. countPlayers() returns 2 after two players are registered.")
-    print("Passed second registration")
+            "Newly registered players should have no matches or wins.")
+    if set([name1, name2]) != set(["Melpomene Murray", "Randy Schwartz"]):
+        raise ValueError("Registered players' names should appear in standings, "
+                         "even if they have no matches played.")
+    print ("6. Newly registered players appear in the standings with no matches.")
 
-    deletePlayers()
-    c = countPlayers()
-    if c != 0:
-        raise ValueError(
-            "After deletion, countPlayers should return zero.")
-    print ("4. countPlayers() returns zero after registered players are deleted.\n5. Player records successfully deleted.")
-
-testCount()
+testStandingsBeforeMatches()
 
 cur.close()
 cnx.close()
