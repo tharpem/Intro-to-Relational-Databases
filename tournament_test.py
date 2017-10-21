@@ -4,12 +4,12 @@
 # If you do add any of the extra credit options, be sure to add/modify these test cases
 # as appropriate to account for your module's added functionality.
 
-
-
 from tournament import *
-connect()
 cnx = psycopg2.connect("dbname='tournament'")
 cur = cnx.cursor()
+connect()
+
+
 
 
 def testCount():

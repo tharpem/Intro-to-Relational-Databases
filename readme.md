@@ -50,5 +50,10 @@ Other functions included:
   * Correct listing of players and data in tables
   * Correct matching of players
 
+In order to test the functions:
+1. Set up the database - Run \i tournament.sql on the command line.
+2. Check the functions - Run python tournament_test.py on the command line.
+
+
 ##Authors
   Maji Tharpe

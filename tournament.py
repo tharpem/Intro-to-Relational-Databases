@@ -5,6 +5,9 @@
 import psycopg2
 import sys
 
+cnx = psycopg2.connect("dbname='tournament'")
+cur = cnx.cursor()
+
 def connect():
 #     """Connect to the PostgreSQL database.  Returns a database connection."""
     return psycopg2.connect("dbname='tournament'")
